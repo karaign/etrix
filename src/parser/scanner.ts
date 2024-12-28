@@ -1,4 +1,4 @@
-import { Token, tokenKinds } from "./tokens.ts";
+import { Token, TOKENS } from "./tokens.ts";
 import { ParseError } from "../errors.ts";
 
 /**
@@ -57,17 +57,16 @@ export class Scanner {
     // Test against known token kinds until we find
     // one for which this.input[this.pos] is a valid beginning character.
     // Keep reading valid non-beginning characters until we hit one that isn't.
-    for (const tKind of Object.values(tokenKinds)) {
-      if (tKind.fChar(this.ch())) {
-        this.pos++;
-        while (this.ch() && tKind.nChar(this.ch())) {
-          this.pos++;
-        }
+    for (const [name, regex] of Object.entries(TOKENS)) {
+      // Try matching regex to substring beginning at this.pos
+      const match = regex.exec(this.input.substring(this.pos));
+      if (match) {
+        this.pos += match[0].length;
         // Update this.peek with the newly read token
         this.peek = {
-          kind: tKind.name,
+          kind: name,
           pos: start,
-          stringRepr: this.input.substring(start, this.pos)
+          stringRepr: match[0]
         }
         return;
       }
