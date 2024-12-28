@@ -1,22 +1,41 @@
-// import { parse } from "https://deno.land/std@0.200.0/flags/mod.ts";
-
+import { parseArgs } from "@std/cli/parse-args";
 import { parse, evaluate } from "../src/index.ts";
+import { ParseError, EvaluationError } from "../src/errors.ts";
 
 /**
   * Main function
   */
 function main (argv: string[]) {
-  let input: string = "";
+  // Handle arguments
+  const args = parseArgs(argv, {
+    alias: {
+      "v": "version"
+    },
+    boolean: ["version"]
+  });
+
+  // Print version if requested
+  if (args.version) {
+    console.log("Etrix v.0.0.0");
+    Deno.exit();
+  }
+
+  let input: string;
+  // Main read-evaluate-print loop
   while (true) {
-    input = prompt(">");
+    input = prompt(">") ?? 'q';
 
     if (input === 'q') break;
+    if (input === '') continue;
+
     try {
-      const ast = parse(input);
-      const result = evaluate(ast);
-      console.log(result.length == 1? result[0] : result)
-    } catch (e: Error) {
-      console.error("ERR: " + e.message);
+      console.log(evaluate(parse(input)));
+    } catch (e) {
+      if (e instanceof ParseError || e instanceof EvaluationError) {
+        console.error("ERR: " + e.message);
+      } else {
+        console.error(e);
+      }
     }
   }
 }
