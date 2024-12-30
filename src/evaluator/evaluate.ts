@@ -1,4 +1,4 @@
-import { Expr } from "./parser.ts";
+import { Expr } from "../parser/parser.ts";
 import { EvaluationError, ParseError } from "../errors.ts";
 
 const OPS: {
